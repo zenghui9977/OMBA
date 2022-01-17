@@ -1,0 +1,66 @@
+---
+type: mnist
+lr: 0.1
+poison_lr: 0.1
+poison_step_lr: true
+momentum: 0.9
+decay: 0.0005
+epochs: 80
+batch_size: 64
+test_batch_size: 64
+local_epochs: 1
+poison_local_epochs: 3
+
+aggr_epoch_interval: 1
+poisoning_per_batch: 20
+
+number_of_total_participants: 100
+number_of_each_round_participants: 10
+
+is_poison: true
+alpha_loss: 1
+poison_label_swap: 3
+
+poison_pattern: [[0, 0], [0, 1], [0, 2], [1,0], [1, 1], [1, 2], [2,0], [2, 1], [2, 2]] # add a white pixel at location 0,0 and 1,1
+
+
+sampling_dirichlet: true
+dirichlet_alpha: 0.5
+
+
+is_random_adversary: false # the adversary is randomly participated in the training process, false-->the adversary participate the training process in fixed round
+
+adversary_list: [41, 73, 51, 74]
+
+attack_mode: on_and_off_attack
+scale_at_start_epoch: false
+scale_weight_at_start_epoch: 2
+scale_rounds_at_start_epoch: 1
+
+
+# parameter list of each attackers, on: X1, off: X2, numbers: X3, start_epochs: X4
+0_poison_epochs: [3, 7, 3, 40]
+1_poison_epochs: []
+2_poison_epochs: []
+3_poison_epochs: []
+
+
+eta: 1 # multi-shot 1, single-shot 0.1
+diff_privacy: false
+sigma: 0.01
+
+is_train: true
+is_test: false
+
+use_pretrain_model: false
+pretrain: false
+pretrain_terminal_round: 15
+
+one_shot_attack: false
+scale_weight: 2
+
+attacker_trace: true
+failure_samples_num: 40
+test_folder: None
+
+
