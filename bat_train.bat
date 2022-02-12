@@ -30,9 +30,9 @@
 @REM python main.py --params ./params_folder/mnist_on_and_off_attack.yaml --0_poison_epochs 2 5 3 40 --1_poison_epochs 2 5 3 40 --poison_local_epochs 3 
 @REM python main.py --params ./params_folder/mnist_on_and_off_attack.yaml --0_poison_epochs 2 5 3 40 --1_poison_epochs 2 5 3 40 --poison_local_epochs 3 
 
-python main.py --params ./params_folder/mnist_on_and_off_attack.yaml --0_poison_epochs 2 5 3 40 --1_poison_epochs 2 5 3 40 --2_poison_epochs 2 5 3 40 --poison_local_epochs 3 
-python main.py --params ./params_folder/mnist_on_and_off_attack.yaml --0_poison_epochs 2 5 3 40 --1_poison_epochs 2 5 3 40 --2_poison_epochs 2 5 3 40 --poison_local_epochs 3 
-python main.py --params ./params_folder/mnist_on_and_off_attack.yaml --0_poison_epochs 2 5 3 40 --1_poison_epochs 2 5 3 40 --2_poison_epochs 2 5 3 40 --poison_local_epochs 3 
+@REM python main.py --params ./params_folder/mnist_on_and_off_attack.yaml --0_poison_epochs 2 5 3 40 --1_poison_epochs 2 5 3 40 --2_poison_epochs 2 5 3 40 --poison_local_epochs 3 
+@REM python main.py --params ./params_folder/mnist_on_and_off_attack.yaml --0_poison_epochs 2 5 3 40 --1_poison_epochs 2 5 3 40 --2_poison_epochs 2 5 3 40 --poison_local_epochs 3 
+@REM python main.py --params ./params_folder/mnist_on_and_off_attack.yaml --0_poison_epochs 2 5 3 40 --1_poison_epochs 2 5 3 40 --2_poison_epochs 2 5 3 40 --poison_local_epochs 3 
 
 
 @REM python main.py --params ./params_folder/mnist_on_and_off_attack.yaml --0_poison_epochs 1 3 3 40 --1_poison_epochs 1 3 3 40 --2_poison_epochs 1 3 3 40 --poison_local_epochs 4
@@ -40,3 +40,12 @@ python main.py --params ./params_folder/mnist_on_and_off_attack.yaml --0_poison_
 @REM python main.py --params ./params_folder/mnist_on_and_off_attack.yaml --0_poison_epochs 1 3 3 40 --1_poison_epochs 1 3 3 40 --2_poison_epochs 1 3 3 40 --poison_local_epochs 4
 
 @REM python main.py --params ./params_folder/mnist_on_and_off_attack.yaml --0_poison_epochs 1 3 3 40 --1_poison_epochs 1 3 3 40 --2_poison_epochs 1 3 3 40 --poison_local_epochs 4
+
+
+python main.py --params ./params_folder/mnist_on_and_off_attack.yaml --0_poison_epochs 1 3 4 40 --1_poison_epochs 1 3 4 40 --2_poison_epochs 1 3 4 40 --poison_local_epochs 3 
+
+python main.py --params ./params_folder/mnist_on_and_off_attack.yaml --0_poison_epochs 1 3 4 40 --1_poison_epochs 1 3 4 40 --2_poison_epochs 1 3 4 40 --poison_local_epochs 3 
+
+python main.py --params ./params_folder/mnist_on_and_off_attack.yaml --0_poison_epochs 1 3 4 40 --1_poison_epochs 1 3 4 40 --2_poison_epochs 1 3 4 40 --poison_local_epochs 3 
+
+

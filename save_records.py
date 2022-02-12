@@ -41,7 +41,7 @@ def save_result_csv(folder_path):
     test_writer.writerows(test_results)
     test_csvFile.close()
 
-def save_training_models_and_updates(model_saved_folder, current_epoch, global_model, local_updates_dict):
+def save_training_models_and_updates(model_saved_folder, current_epoch, global_model, local_updates_dict, participants_list_current, adversarial_list_current):
     current_model_saved_folder = f'{model_saved_folder}/{current_epoch}'
     try:
         os.makedirs(current_model_saved_folder)
@@ -54,7 +54,17 @@ def save_training_models_and_updates(model_saved_folder, current_epoch, global_m
     for key in local_updates_dict.keys():
         local_updates_name = f'{current_model_saved_folder}/epoch_{current_epoch}_client_{key}_local_update'
         torch.save(local_updates_dict[key], local_updates_name)
+    participants_name = f'{current_model_saved_folder}/participants'
+    torch.save(participants_list_current, participants_name)
+
+    adversarial_name = f'{current_model_saved_folder}/adversarial'
+    torch.save(adversarial_list_current, adversarial_name)
+
     logger.info('save the global model and local updates finished!')
+
+
+
+
 
 def read_csv_from_file(file_folder, file_name, column_name):
     csv_list = pd.read_csv(file_folder + file_name)
