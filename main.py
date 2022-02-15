@@ -4,6 +4,7 @@ import time
 import logging
 import numpy as np
 import argparse
+import pandas as pd
 
 
 
@@ -14,10 +15,12 @@ import visdom
 import copy
 from args_setting import Args_parse
 import constant_str
+from detection import Detector, compute_precision_and_recall_f1
 import save_records
 from helper import Helper
 from local_train import Image_Trainer
 from evaluation import compute_2_tensor_mse, compute_JS_loss, compute_KL_loss, compute_cosine_similarity, compute_cross_entropy, compute_slope_in_each_round, compute_the_output_of_each_sample, sort_cut_list, test_on_data, transfer_cos_similarity, transfer_using_min_max
+from visualization import plot_anomaly_time_series_line
 
 logger = logging.getLogger('logger')
 
@@ -104,7 +107,7 @@ if helper.params['is_train']:
             save_records.save_result_csv(helper.folder_path)
 
             # save the global model and submitted local updates       
-            save_records.save_training_models_and_updates(helper.model_saved_folder, epoch, global_model.state_dict(), submit_update_dict)
+            save_records.save_training_models_and_updates(helper.model_saved_folder, epoch, global_model.state_dict(), submit_update_dict, participants_list_current, adversarial_list_current)
             
     # save the list into pictures
     if helper.params['is_poison']:
@@ -150,9 +153,6 @@ if helper.params['attacker_trace']:
     for i in range(len(cs_list)):
         save_records.output_res_list.append([i, cs_list[i], cross_entropy_list[i], mse_loss_list[i]])
     save_records.save_output_res_csv(helper.folder_path)
-
-
-
 
 
     # draw the pic
@@ -222,43 +222,41 @@ if helper.params['attacker_trace']:
     save_records.pic_line(cross_entropy_slope_list, title='Cross Entropy Slope', y_label='Cross Entropy Slope', saved_file_name=f'{helper.pic_saved_folder}/cross_entropy_slope.png', attack_time_list=list(helper.attack_time_set), aux_line=0)
     save_records.pic_line(transfer_cross_entropy, title='Cross Entropy(normalized)', y_label='Cross Entropy(normalized)', saved_file_name=f'{helper.pic_saved_folder}/normalized_cross_entropy.png', attack_time_list=list(helper.attack_time_set))
     save_records.pic_line(transfer_cross_entropy_slope_list, title='Cross Entropy Slope(normalized)', y_label='Cross Entropy Slope(normalized)', saved_file_name=f'{helper.pic_saved_folder}/normalized_cross_entropy_slope.png', attack_time_list=list(helper.attack_time_set), aux_line=0)
-
+    logger.info('saving the lines......')
   
+    # Using the detector to get the anomaly
 
-    composite_list = np.array(transfer_cs_slope_list)+np.array(transfer_mse_loss_slope_list)+np.array(transfer_cross_entropy_slope_list)
+    # read the data from csv file
+    time_series = pd.read_csv(f'{helper.folder_path}/output_eval_result.csv')
+
+    time_series = time_series.iloc[:, 1:]
+        
+    cols_name_list = time_series.columns
+ 
+    time_series_values = time_series.values
     
-    vis.line(
-        X = np.array(range(len(composite_list))), Y=np.array(composite_list), win=f'composite_list_{current_time}',
-        opts=dict(showlegend=False, title='Composite value',width=400, height=400, xlabel='Communication rounds', ylabel='Composite Slope')
-    ) 
+    # normalize the time series
+    for i in range(len(cols_name_list)):
+        temp_list = time_series_values[:, i]
+        # cosine simialrity
+        if i == 0:
+            time_series.iloc[:, i] = transfer_cos_similarity(temp_list)
+        else:
+            time_series.iloc[:, i] = transfer_using_min_max(temp_list)
 
-    attack_set = list(helper.get_attack_set())
-    attack_set.sort(reverse=False)
-    print(attack_set)
+    dec = Detector(window=2, c=1.0, side='negative', detector_type='PersistAD')
 
-    print(sort_cut_list(transfer_cs_slope_list))
-    print(sort_cut_list(transfer_mse_loss_slope_list))
-    print(sort_cut_list(transfer_cross_entropy_slope_list))
+    anomaly_points, anomaly_series = dec.detect_anomaly_series(time_series=time_series, detection_range=(20, 80))
 
-    print(sort_cut_list(composite_list))
-    # x = np.argsort(transfer_cs_slope_list)
-    # print(transfer_cs_slope_list)
-    # transfer_cs_slope_list.sort(reverse=False)
-    # print(transfer_cs_slope_list)
-    # print(x)
+    for i in range(len(cols_name_list)):
 
-    # x2 = np.argsort(transfer_mse_loss_slope_list)
-    # print(transfer_mse_loss_slope_list)
-    # transfer_mse_loss_slope_list.sort(reverse=False)
-    # print(transfer_mse_loss_slope_list)
-    # print(x2)
+        print('-'*20 + str(cols_name_list[i]) + '-'*20)
+        precision, recall, f1 = compute_precision_and_recall_f1(anomaly_points[i], list(helper.attack_time_set))
 
+        logger.info(f'Precision: {precision}\nRecall: {recall}\n F1-Score: {f1}')
 
-    # x3 = np.argsort(transfer_cross_entropy_slope_list)
-    # print(transfer_cross_entropy_slope_list)
-    # transfer_cross_entropy_slope_list.sort(reverse=False)
-    # print(transfer_cross_entropy_slope_list)
-    # print(x3)
+        plot_anomaly_time_series_line(time_series = time_series.iloc[:, i], anomaly_ts=anomaly_series[i], ts_name=[cols_name_list[i]], legend=True, ground_truth=list(helper.attack_time_set), save_file_path=f'{helper.folder_path}/detection_result/')
 
-logger.info('saving the lines......')
+    logger.info('plot and save the anomaly lines......')
+
 

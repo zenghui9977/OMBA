@@ -5,7 +5,7 @@ poison_lr: 0.1
 poison_step_lr: true
 momentum: 0.9
 decay: 0.0005
-epochs: 80
+epochs: 100
 batch_size: 64
 test_batch_size: 64
 local_epochs: 1
