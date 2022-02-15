@@ -1,3 +1,7 @@
 /exp_records
 /__pycache__
+<<<<<<< HEAD
+/data
+=======
 /models/__pycache__
+>>>>>>> fc0028cbcce521dcf5502861a2d25bc3c8dabcc6
