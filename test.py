@@ -54,7 +54,7 @@ for i in file_path_list:
     res = anomaly_detection(f'{folder_path}/{i}', ground_truth=list(attack_time_set))
     if res is not None:
         print(f'Precision: {res[0]}, Recall: {res[1]}, F1: {res[2]}')
-        suspected_adverisaries = find_adversaries(res[3], f'{folder_path}/{i}')
+        suspected_adverisaries = find_adversaries(res[3], f'{folder_path}/{i}', method='intersection')
     else:
         print(res)
 

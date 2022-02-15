@@ -3,6 +3,7 @@ import os
 from adtk.detector import PersistAD
 import pandas as pd
 import numpy as np
+import torch
 import constant_str
 from evaluation import transfer_cos_similarity, transfer_using_min_max
 import re
@@ -130,13 +131,17 @@ def compute_precision_and_recall_f1(detection_anomaly_points, ground_truth):
 def convert_array_to_list(input_list):
     temp_list = []
     for i in input_list:
-        if isinstance(i, np.ndarray):
-            i = i.tolist()
-        
-        if len(temp_list) == 0:
-            temp_list = i
+        if isinstance(i, int):
+            temp_list.append(i)
+
         else:
-            temp_list += i
+            if isinstance(i, np.ndarray):
+                i = i.tolist()
+            
+            if len(temp_list) == 0:
+                temp_list = i
+            else:
+                temp_list += i
         
     return temp_list
 
@@ -175,7 +180,7 @@ def vote_threshold_index(input_list, threshold):
     # print(temp_list)
 
     count_list = Counter(temp_list)
-    # print(count_list)
+    print(count_list)
 
     dic = sorted(count_list.items(), key = lambda x: x[1], reverse=True)
 
@@ -220,39 +225,47 @@ def anomaly_detection(detection_file_path, ground_truth):
     else:
         return None
 
-def read_client_id_from_exp_record(epoch_folder_file_list):
-    client_id_list = []
-    for i in epoch_folder_file_list:
-        temp = re.findall(r"\d+", i)
-        # use the second number: the client index
-        if len(temp) > 1:
-            client_id_list.append(int(temp[1]))
-    # print(client_id_list)
+def read_client_id_from_exp_record(epoch_folder_file_path):
+
+    epoch_folder_file_list = os.listdir(epoch_folder_file_path)
+
+    if constant_str.PARTICIPANTS_FILE_NAME in epoch_folder_file_list:
+        client_id_list = torch.load(f'{epoch_folder_file_path}/{constant_str.PARTICIPANTS_FILE_NAME}')
+    else:
+        client_id_list = []
+        for i in epoch_folder_file_list:
+            temp = re.findall(r"\d+", i)
+            # use the second number: the client index
+            if len(temp) > 1:
+                client_id_list.append(int(temp[1]))
+        # print(client_id_list)
     return client_id_list
 
 
-def find_adversaries(anomaly_epochs, detection_file_path):
+def find_adversaries(anomaly_epochs, detection_file_path, method):
 
     if not os.path.exists(detection_file_path):
         raise FileExistsError('%s is not exist' % detection_file_path)
 
     client_id_list = []
-
-    
+ 
     for epoch in anomaly_epochs:
         if not os.path.exists(f'{detection_file_path}/{constant_str.DETECTION_MODEL_FOLDER}/{epoch}/'):
             raise FileExistsError(f'the epoch %s is not existed in the experiment records' % epoch)
         
-        epoch_folder_file_list = os.listdir(f'{detection_file_path}/{constant_str.DETECTION_MODEL_FOLDER}/{epoch}/')
-
-        epoch_client_id_list = read_client_id_from_exp_record(epoch_folder_file_list)
+        epoch_client_id_list = read_client_id_from_exp_record(f'{detection_file_path}/{constant_str.DETECTION_MODEL_FOLDER}/{epoch}/')
 
         client_id_list.append(epoch_client_id_list)
 
-    intersection_client = set(client_id_list[0]).intersection(*client_id_list[1:])
-    print(intersection_client)
+    if method == 'intersection':
 
-    return intersection_client
+        adversaries_list = set(client_id_list[0]).intersection(*client_id_list[1:])
+    elif method == 'count':
+        count_alpha = 0.5
+        adversaries_list = vote_threshold_index(client_id_list, len(client_id_list) * count_alpha)
+
+    print(adversaries_list)
+    return adversaries_list
 
 
 
